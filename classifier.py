@@ -4,7 +4,7 @@
 # Use the skeleton below for the classifier and insert your code here.
 import numpy as np
 
-class Classifier:
+class NaiveBayesClassifier:
     def __init__(self):
         self.pv = [] # array to hold p(v_i)
         self.v = [] # will hold occurances of v
@@ -22,10 +22,17 @@ class Classifier:
         self.pv = [0, 0, 0, 0]
         self.v = [0, 0, 0, 0]
 
-        self.a0 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        self.a1 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        self.a2 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        self.a3 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        self.a0 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.a1 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.a2 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        
+        self.a3 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
+                   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
     
     # Training function. Data is in the form of a feature vector and target is the resultant direction in number form
     def fit(self, data, target):
@@ -67,3 +74,29 @@ class Classifier:
             self.pv[3] *= self.a3[v][i]
 
         return np.argmax(self.pv)
+
+class Classifier:
+    def __init__(self):
+        self.clist = []
+
+        self.nb_classifier = NaiveBayesClassifier()
+        self.clist.append(self.nb_classifier)
+
+    # Called when a game is over - clean something up
+    def reset(self):
+        for c in self.clist:
+            c.reset()
+        
+    # Training function. Data is in the form of a feature vector and target is the resultant direction in number form
+    def fit(self, data, target):
+        for c in self.clist:
+            c.fit(data, target)
+
+    # Needs to return a number (0,1,2,3) direction
+    def predict(self, data, legal=None):
+        tally = [0, 0, 0, 0]
+
+        for c in self.clist:
+            tally[c.predict(data, legal)] += 1
+
+        return np.argmax(tally)
