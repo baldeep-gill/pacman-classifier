@@ -4,6 +4,35 @@
 # Use the skeleton below for the classifier and insert your code here.
 import numpy as np
 
+class LinearRegressionClassifier:
+    def __init__(self):
+        self.weights = [] # 25 features and 1 dummy feature
+        self.h = [] # Will hold value of h(x) for each training set
+        self.alpha = 0.01
+
+        self.reset()
+
+    def reset(self):
+        self.weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+    def hfunction(self, data):
+        h = 0
+        for i in range(0, 26):
+            h += self.weights[i] * data[i]
+
+        return h
+
+    # Gradient descent ?
+    def fit(self, data, target):
+        for i in range(0, 25):
+            self.data = [1] + data[i] # Dummy variable x0
+            self.target = target[i]
+
+            
+
+    def predict(self, data, legal=None):
+        pass
+
 class NaiveBayesClassifier:
     def __init__(self):
         self.pv = [] # array to hold p(v_i)
@@ -37,6 +66,7 @@ class NaiveBayesClassifier:
     
     # Training function. Data is in the form of a feature vector and target is the resultant direction in number form
     def fit(self, data, target):
+        print(target)
         self.v = np.bincount(np.array(target)) # -> [28 33 26 39] number of instances of 0 1 2 3 in their respetive indicies
         self.pv = list(map(lambda x: x / len(target), self.v)) # Map each value to the probability of that index occuring in the training data
 
