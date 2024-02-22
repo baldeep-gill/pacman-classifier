@@ -7,7 +7,7 @@ import numpy as np
 class LinearRegressionClassifier:
     def __init__(self):
         self.weights = None # 25 features and 1 dummy feature
-        self.alpha = 0.01
+        self.alpha = 0.01 # learning rate
 
         self.reset()
 
@@ -20,6 +20,7 @@ class LinearRegressionClassifier:
     def hfunction(self, data):
         h = 0
         # Param data is assumed to be a certain instance of training data with x_j,0 = 1 appended to the end
+        # Perform summation calculation for multivariate regression to find value of h(x_j) 
         for i in range(0, 26):
             h += self.weights[i] * data[i]
 
@@ -32,8 +33,9 @@ class LinearRegressionClassifier:
             # Batch gradient descent
             # j is index of a training data set 
             for j in range(0, len(data)):
-                self.training = data[j] + [1]
-                temp += (target[j] - self.hfunction(self.training + [1])) * self.training[i] # Sigma( ( y_j - hw(x_j) ) * x_j,i )
+                self.training = data[j] + [1] # Each training data set needs a 1 appended to account for dummy variable
+                # Summation step:
+                temp += (target[j] - self.hfunction(self.training)) * self.training[i] # Sigma( ( y_j - hw(x_j) ) * x_j,i )
 
             temp *= self.alpha
             # Update weight w_i 
@@ -42,11 +44,13 @@ class LinearRegressionClassifier:
 
     def predict(self, data, legal=None):
         temp = 0
+        # Apply the learned weights to the unseen example
         for i in range(0, 25):
             temp += data[i] * self.weights[i]
 
         temp += self.weights[25] # + w0
-        
+
+        # Return a *valid* action to take 
         return 3 if temp >= 3 else 0 if temp <= 0 else round(temp)
 
 class NaiveBayesClassifier:
@@ -62,12 +66,12 @@ class NaiveBayesClassifier:
 
         self.reset()
 
-    # Called when a game is over - clean something up
     def reset(self):
         self.pv = [0, 0, 0, 0]
         self.v = [0, 0, 0, 0]
 
         # first row is for when the feature is set to 0, second row for 1
+        # assuming feature vectors always consist of 25 values
         self.a0 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
         
@@ -80,14 +84,13 @@ class NaiveBayesClassifier:
         self.a3 = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
     
-    # Training function. Data is in the form of a feature vector and target is the resultant direction in number form
     def fit(self, data, target):
-        self.v = np.bincount(np.array(target)) # -> [28 33 26 39] number of instances of 0 1 2 3 in their respetive indicies
+        self.v = np.bincount(np.array(target)) # -> [28 33 26 39] | Number of instances of 0 1 2 3 in their respetive indicies
         self.pv = list(map(lambda x: x / len(target), self.v)) # Map each value to the probability of that index occuring in the training data
 
         # count up occurances
-        for fv, trgt in zip(data, target):
-            for f, i in zip(fv, range(0, 25)):
+        for fv, trgt in zip(data, target): # fv is a certain training data set x_j. trgt is the corresponding outcome y_j
+            for f, i in zip(fv, range(0, 25)): # Tally up occurances of each recorded feature in fv along with the corresponding outcome
                 match trgt:
                     case 0:
                         self.a0[f][i] += 1
@@ -98,7 +101,7 @@ class NaiveBayesClassifier:
                     case 3:
                         self.a3[f][i] += 1
                     case _:
-                        print("stinker")
+                        print("uh oh")
 
         # Calculate p(a|v) for each feature
         self.a0 = [[x / self.v[0] for x in i] for i in self.a0]
@@ -106,7 +109,6 @@ class NaiveBayesClassifier:
         self.a2 = [[x / self.v[2] for x in i] for i in self.a2]
         self.a3 = [[x / self.v[3] for x in i] for i in self.a3]
 
-    # Needs to return a number (0,1,2,3) direction
     def predict(self, data, legal=None):
         
         # p(v) for each v is held in list self.pv
@@ -136,13 +138,11 @@ class Classifier:
         self.linear_classifier = LinearRegressionClassifier()
         self.clist.append(self.linear_classifier)
 
-    # Called when a game is over - clean something up
     def reset(self):
         # Call reset method on every classifier
         for c in self.clist:
             c.reset()
         
-    # Training function. Data is in the form of a feature vector and target is the resultant direction in number form
     def fit(self, data, target):
         # Call fit method on every classifier
         for c in self.clist:
