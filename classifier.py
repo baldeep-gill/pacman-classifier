@@ -3,6 +3,42 @@
 #
 # Use the skeleton below for the classifier and insert your code here.
 import numpy as np
+import math
+
+class KNNClassifier:
+    def __init__(self):
+        self.t_data = None
+        self.t_target = None
+        self.feature_len = 0
+
+        self.reset()
+
+    def reset(self):
+        self.t_data = None
+        self.t_target = None
+        self.feature_len = 0
+
+    def distance(self, x, y):
+        # euclidean distance
+         
+        diff = [x[i] - y[i] for i in range(0, self.feature_len)] # a - b
+        return np.sqrt(sum(x ** 2 for x in diff)) # sum the square of the differences and then square root
+
+    def fit(self, data, target):
+        # no need for training.
+        self.t_data = data
+        self.t_target = target
+        self.feature_len = len(data[0])
+
+    def predict(self, unseen, legal=None):
+        closest = math.inf
+        outcome = 0
+
+        for i in range(0, len(self.t_data)):
+            d = self.distance(unseen, self.t_data[i]) # calculate distance between unseen feature vector and each set of data from training set
+            if d < closest : closest = d ; outcome = self.t_target[i] # update vars if a closer feature set was found
+
+        return outcome
 
 class LinearRegressionClassifier:
     def __init__(self):
@@ -138,6 +174,9 @@ class Classifier:
         self.linear_classifier = LinearRegressionClassifier()
         self.clist.append(self.linear_classifier)
 
+        self.knn_classifier = KNNClassifier()
+        self.clist.append(self.knn_classifier)
+
     def reset(self):
         # Call reset method on every classifier
         for c in self.clist:
@@ -159,4 +198,5 @@ class Classifier:
 
         # Checking for legal actions is done by getAction() in classifierAgents and by api.makeMove()
         # argmax will return the first index of the max value in the list (in case of duplicates)
+        print(tally)
         return np.argmax(tally)
