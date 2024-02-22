@@ -1,7 +1,5 @@
-# classifier.py
-# Lin Li/26-dec-2021
-#
-# Use the skeleton below for the classifier and insert your code here.
+# Algorithms used are from ML1 slides.
+
 import numpy as np
 import math
 
