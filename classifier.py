@@ -6,32 +6,48 @@ import numpy as np
 
 class LinearRegressionClassifier:
     def __init__(self):
-        self.weights = [] # 25 features and 1 dummy feature
-        self.h = [] # Will hold value of h(x) for each training set
+        self.weights = None # 25 features and 1 dummy feature
         self.alpha = 0.01
 
         self.reset()
 
     def reset(self):
-        self.weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        # Weight list will consist of values for 25 features + 1 dummy feature for w0
+        self.weights = []
+        for i in range(0, 26):
+            self.weights.append(1)
 
     def hfunction(self, data):
         h = 0
+        # Param data is assumed to be a certain instance of training data with x_j,0 = 1 appended to the end
         for i in range(0, 26):
             h += self.weights[i] * data[i]
 
         return h
 
-    # Gradient descent ?
     def fit(self, data, target):
-        for i in range(0, 25):
-            self.data = [1] + data[i] # Dummy variable x0
-            self.target = target[i]
+        # Update 26 weights (25 features, 1 dummy)
+        for i in range(0, 26):
+            temp = 0 # Running total for summation
+            # Batch gradient descent
+            # j is index of a training data set 
+            for j in range(0, len(data)):
+                self.training = data[j] + [1]
+                temp += (target[j] - self.hfunction(self.training + [1])) * self.training[i] # Sigma( ( y_j - hw(x_j) ) * x_j,i )
 
+            temp *= self.alpha
+            # Update weight w_i 
+            self.weights[i] += temp
             
 
     def predict(self, data, legal=None):
-        pass
+        temp = 0
+        for i in range(0, 25):
+            temp += data[i] * self.weights[i]
+
+        temp += self.weights[25] # + w0
+        
+        return 3 if temp >= 3 else 0 if temp <= 0 else round(temp)
 
 class NaiveBayesClassifier:
     def __init__(self):
@@ -66,7 +82,6 @@ class NaiveBayesClassifier:
     
     # Training function. Data is in the form of a feature vector and target is the resultant direction in number form
     def fit(self, data, target):
-        print(target)
         self.v = np.bincount(np.array(target)) # -> [28 33 26 39] number of instances of 0 1 2 3 in their respetive indicies
         self.pv = list(map(lambda x: x / len(target), self.v)) # Map each value to the probability of that index occuring in the training data
 
@@ -117,6 +132,9 @@ class Classifier:
 
         self.nb_classifier = NaiveBayesClassifier()
         self.clist.append(self.nb_classifier)
+
+        self.linear_classifier = LinearRegressionClassifier()
+        self.clist.append(self.linear_classifier)
 
     # Called when a game is over - clean something up
     def reset(self):
