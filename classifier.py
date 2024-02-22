@@ -7,9 +7,11 @@ import math
 
 class KNNClassifier:
     def __init__(self):
+        self.K = 3 # CANNOT BE LOWER THAN 1
+
         self.t_data = None
         self.t_target = None
-        self.feature_len = 0
+        self.feature_len = 0 # Length of feature vectors (to prevent out of bounds exceptions)
 
         self.reset()
 
@@ -31,14 +33,21 @@ class KNNClassifier:
         self.feature_len = len(data[0])
 
     def predict(self, unseen, legal=None):
-        closest = math.inf
-        outcome = 0
+        closest = []
+        outcome = []
+
+        for i in range(0, self.K): # Expand the candidate lists to size K
+            closest.append(math.inf)
+            outcome.append(0)
 
         for i in range(0, len(self.t_data)):
             d = self.distance(unseen, self.t_data[i]) # calculate distance between unseen feature vector and each set of data from training set
-            if d < closest : closest = d ; outcome = self.t_target[i] # update vars if a closer feature set was found
+            biggest = np.argmax(closest) # index biggest value in closest
+            if d < closest[biggest] : closest[biggest] = d ; outcome[biggest] = self.t_target[i] # update vars if a closer feature set was found
 
-        return outcome
+        out = round(np.average(outcome))
+
+        return 3 if out > 3 else 0 if out < 0 else out
 
 class LinearRegressionClassifier:
     def __init__(self):
