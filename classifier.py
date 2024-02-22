@@ -11,26 +11,23 @@ class KNNClassifier:
 
         self.t_data = None
         self.t_target = None
-        self.feature_len = 0 # Length of feature vectors (to prevent out of bounds exceptions)
 
         self.reset()
 
     def reset(self):
         self.t_data = None
         self.t_target = None
-        self.feature_len = 0
 
     def distance(self, x, y):
         # euclidean distance
          
-        diff = [x[i] - y[i] for i in range(0, self.feature_len)] # a - b
+        diff = [x[i] - y[i] for i in range(0, 25)] # a - b
         return np.sqrt(sum(x ** 2 for x in diff)) # sum the square of the differences and then square root
 
     def fit(self, data, target):
         # no need for training.
         self.t_data = data
         self.t_target = target
-        self.feature_len = len(data[0])
 
     def predict(self, unseen, legal=None):
         closest = []
@@ -51,8 +48,9 @@ class KNNClassifier:
 
 class LinearRegressionClassifier:
     def __init__(self):
+        self.ALPHA = 0.01 # learning rate
+
         self.weights = None # 25 features and 1 dummy feature
-        self.alpha = 0.01 # learning rate
 
         self.reset()
 
@@ -82,7 +80,7 @@ class LinearRegressionClassifier:
                 # Summation step:
                 temp += (target[j] - self.hfunction(self.training)) * self.training[i] # Sigma( ( y_j - hw(x_j) ) * x_j,i )
 
-            temp *= self.alpha
+            temp *= self.ALPHA
             # Update weight w_i 
             self.weights[i] += temp
             
@@ -146,7 +144,7 @@ class NaiveBayesClassifier:
                     case 3:
                         self.a3[f][i] += 1
                     case _:
-                        print("uh oh")
+                        print("something went wrong (1)")
 
         # Calculate p(a|v) for each feature
         self.a0 = [[x / self.v[0] for x in i] for i in self.a0]
@@ -207,5 +205,4 @@ class Classifier:
 
         # Checking for legal actions is done by getAction() in classifierAgents and by api.makeMove()
         # argmax will return the first index of the max value in the list (in case of duplicates)
-        print(tally)
         return np.argmax(tally)
